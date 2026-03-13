@@ -44,7 +44,7 @@ export function AppSidebar() {
   const isCollapsed = state === "collapsed"
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="font-mono">
       <SidebarHeader>
       <div
         className={cn(
@@ -60,7 +60,7 @@ export function AppSidebar() {
               <></>
             )}
           <div className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-sm font-semibold justify-start">CampusNav</span>
+            <span className="truncate text-2xl font-semibold justify-start">CampusNav</span>
             {/* <span className="truncate text-xs text-sidebar-foreground/70">
               Control Center
             </span> */}
