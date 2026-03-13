@@ -8,7 +8,7 @@ import { DashboardCommand } from "./dashboard-command";
 import { ModeToggleBtn } from "../theme-button";
 // import { CurrencySelect } from "@/modules/dashboard/ui/components/currency-select";
 
-export const PageNavbar = () => {
+export const DashBoardNavbar = () => {
   const { state, toggleSidebar, isMobile } = useSidebar();
   const [commandOpen, setCommandOpen] = useState(false);
 
