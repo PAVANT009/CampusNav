@@ -42,10 +42,10 @@ export default async function AuthLayout({
           </blockquote>
         </div>
 
-        <div className="absolute inset-0">
+        {/* <div className="absolute inset-0">
           <FloatingPaths position={1} />
           <FloatingPaths position={-1} />
-        </div>
+        </div> */}
       </div>
 
       <div className="relative flex min-h-screen flex-col justify-center px-8">

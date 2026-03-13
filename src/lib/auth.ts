@@ -58,7 +58,7 @@ export const auth = betterAuth({
   //   max: 10, // 10 requests per window
   // },
 });
-
+  
 // Export auth types for use in other files
 export type Session = typeof auth.$Infer.Session;
 export type User = typeof auth.$Infer.Session.user;
