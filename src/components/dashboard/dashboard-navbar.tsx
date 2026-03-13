@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
 import { PanelLeftIcon, PanelRightIcon, SearchIcon } from "lucide-react";
 import { DashboardCommand } from "./dashboard-command";
+import { ModeToggleBtn } from "../theme-button";
 // import { CurrencySelect } from "@/modules/dashboard/ui/components/currency-select";
 
 export const PageNavbar = () => {
@@ -50,7 +51,7 @@ export const PageNavbar = () => {
 
       <div className="flex flex-row justify-end gap-x-2">
         {/* <CurrencySelect /> */}
-        {/* <ModeToggleBtn /> */}
+        <ModeToggleBtn />
       </div>
     </nav>
     </>
