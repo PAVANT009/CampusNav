@@ -63,6 +63,7 @@ export default function MapClient() {
   const [route, setRoute] = useState<[number, number][] | null>(null)
   const [routeLoading, setRouteLoading] = useState(false)
   const [routeError, setRouteError] = useState<string | null>(null)
+  const [routeCache, setRouteCache] = useState<Record<string, [number, number][]>>({})
 
   useEffect(() => {
     setMounted(true)
@@ -153,6 +154,14 @@ export default function MapClient() {
     const destination = destinations.find((item) => item.id === selectedId)
     if (!destination) return
 
+    const cached = routeCache[selectedId]
+    if (cached) {
+      setRoute(cached)
+      setRouteError(null)
+      setRouteLoading(false)
+      return
+    }
+
     const fetchRoute = async () => {
       setRouteLoading(true)
       setRouteError(null)
@@ -167,7 +176,12 @@ export default function MapClient() {
           data?.routes?.[0]?.geometry?.coordinates?.map(
             (pair: [number, number]) => [pair[1], pair[0]]
           ) ?? []
-        setRoute(coords.length > 0 ? coords : null)
+        if (coords.length > 0) {
+          setRoute(coords)
+          setRouteCache((prev) => ({ ...prev, [selectedId]: coords }))
+        } else {
+          setRoute(null)
+        }
       } catch (error) {
         setRoute(null)
         setRouteError("Unable to load route right now.")
@@ -177,7 +191,7 @@ export default function MapClient() {
     }
 
     fetchRoute()
-  }, [destinations, position, selectedId])
+  }, [destinations, position, routeCache, selectedId])
 
   return (
     <div className="flex-1 p-4 md:p-6">
@@ -209,7 +223,7 @@ export default function MapClient() {
         </button>
         {routeLoading && (
           <span className="self-center text-xs text-muted-foreground">
-            Loading route…
+            Calculating route…
           </span>
         )}
         {routeError && (
@@ -228,6 +242,7 @@ export default function MapClient() {
             setRoute(null)
             setRouteError(null)
           }}
+          loading={routeLoading}
         />
         {mounted && bounds && (
           <MapContainer

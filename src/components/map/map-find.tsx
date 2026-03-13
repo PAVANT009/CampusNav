@@ -15,6 +15,7 @@ type MapFindProps = {
   selectedId: string | null
   onSelect: (id: string) => void
   onClear: () => void
+  loading?: boolean
 }
 
 export default function MapFind({
@@ -22,6 +23,7 @@ export default function MapFind({
   selectedId,
   onSelect,
   onClear,
+  loading = false,
 }: MapFindProps) {
   const [commandOpen, setCommandOpen] = useState(false)
 
@@ -50,6 +52,7 @@ export default function MapFind({
         className="h-9 w-full justify-start gap-2 font-normal text-muted-foreground hover:text-muted-foreground bg-card"
         size="sm"
         onClick={() => setCommandOpen((open) => !open)}
+        disabled={loading}
       >
         <SearchIcon className="size-4" />
         Search
