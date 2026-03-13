@@ -97,7 +97,7 @@ export function SignInForm() {
           Welcome back
         </h1>
         <p className="text-base text-muted-foreground">
-          Sign in to your Archway account
+          Sign in to your CampusNav account
         </p>
       </div>
 

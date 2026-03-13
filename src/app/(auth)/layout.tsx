@@ -27,15 +27,15 @@ export default async function AuthLayout({
           className="dancing-script font-bold text-xl relative z-10"
           href="/"
         >
-          Archway
+          CampusNav
         </Link>
 
         <div className="z-10 mt-auto">
           <blockquote className="space-y-2">
-            <p className="text-xl text-foreground">
-              &ldquo;This platform has saved me countless hours designing system
-              architecture. Truly indispensable.&rdquo;
-            </p>
+        <p className="text-xl text-foreground">
+          &ldquo;This platform makes navigating campus effortless. Finding classrooms, labs, and events has never been easier.&rdquo;
+        </p>
+
             <footer className="font-mono font-semibold text-sm text-muted-foreground">
               ~ A Happy Engineer
             </footer>
