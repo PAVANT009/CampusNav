@@ -36,34 +36,36 @@ export default function TodayClassesCard() {
         {classes.map((cls, index) => (
           <div
             key={index}
-            className="flex items-center  justify-between rounded-md border border-border/60 px-3 py-2"
+            className="first:bg-accent flex items-center rounded-md border border-border/60 px-3 py-2"
           >
-            <span className="text-foreground">{cls.time}</span>
+            <div className="w-1/3 text-foreground">{cls.time}</div>
 
-            <div className="flex flex-col">
+            <div className="w-1/3 flex flex-col items-start">
               <span className="font-medium">{cls.subject}</span>
               <span className="font-light text-muted-foreground">
                 {cls.room}
               </span>
             </div>
 
-            {cls.status === "done" && (
-              <Badge className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
-                Done
-              </Badge>
-            )}
+            <div className="w-1/3 flex justify-end">
+              {cls.status === "done" && (
+                <Badge className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
+                  Done
+                </Badge>
+              )}
 
-            {cls.status === "next" && (
-              <Badge className="bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300">
-                Next
-              </Badge>
-            )}
+              {cls.status === "next" && (
+                <Badge className="bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300">
+                  Next
+                </Badge>
+              )}
 
-            {cls.status === "pending" && (
-              <Badge variant="secondary" className='invisible'>
-                Pending
-              </Badge>
-            )}
+              {cls.status === "pending" && (
+                <Badge variant="secondary" className="invisible">
+                  Pending
+                </Badge>
+              )}
+            </div>
           </div>
         ))}
       </CardContent>

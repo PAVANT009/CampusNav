@@ -42,7 +42,7 @@ export default function DashboardStats() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-semibold">5</div>
-              <p className="mt-2 text-xs text-muted-foreground">Canteen</p>
+              <p className="mt-2 text-xs text-muted-foreground">Canteen,Library+3</p>
             </CardContent>
           </Card>
 
