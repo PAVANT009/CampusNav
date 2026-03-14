@@ -6,9 +6,9 @@ import { GoeyToaster } from "@/components/ui/goey-toaster";
 export function ThemeToaster() {
   const { resolvedTheme } = useTheme();
 
-  const invertedTheme = resolvedTheme === "dark" ? "light" : "dark";
+  const toastTheme = resolvedTheme === "dark" ? "dark" : "light";
 
   return (
-    <GoeyToaster position="top-right" duration={4000} theme={invertedTheme} />
+    <GoeyToaster position="top-right" duration={4000} theme={toastTheme} />
   );
 }

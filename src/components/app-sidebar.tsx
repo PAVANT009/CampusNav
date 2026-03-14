@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -53,10 +54,29 @@ export function AppSidebar() {
   const { state,toggleSidebar } = useSidebar()
   const isCollapsed = state === "collapsed"
   const { data: session } = useSession()
-  const userName =
-    session?.user?.name ||
-    session?.user?.email ||
-    "Campus User"
+  const [displayName, setDisplayName] = useState("Campus User")
+
+  useEffect(() => {
+    const stored =
+      typeof window !== "undefined"
+        ? localStorage.getItem("profileName")
+        : null
+    const nextName =
+      stored ||
+      session?.user?.name ||
+      session?.user?.email ||
+      "Campus User"
+    setDisplayName(nextName)
+  }, [session?.user?.email, session?.user?.name])
+
+  useEffect(() => {
+    const handler = () => {
+      const stored = localStorage.getItem("profileName")
+      if (stored) setDisplayName(stored)
+    }
+    window.addEventListener("profile-updated", handler)
+    return () => window.removeEventListener("profile-updated", handler)
+  }, [])
 
   return (
     <Sidebar collapsible="icon" className="font-mono">
@@ -121,16 +141,16 @@ export function AppSidebar() {
               type="button"
               className="flex items-center gap-3 rounded-md border border-sidebar-border/60 bg-sidebar-accent/10 px-2 py-2 text-left text-sm hover:bg-sidebar-accent/50"
             >
-              <img
-                src={`https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(
-                  userName
-                )}`}
-                alt={userName}
+          <img
+            src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(
+              displayName
+            )}`}
+                alt={displayName}
                 className="size-8 rounded-full border border-sidebar-border/60 "
               />
               {!isCollapsed && (
                 <div className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate font-medium">{userName}</span>
+                  <span className="truncate font-medium">{displayName}</span>
                   {/* <span className="text-xs text-sidebar-foreground/70">
                     View account
                   </span> */}
