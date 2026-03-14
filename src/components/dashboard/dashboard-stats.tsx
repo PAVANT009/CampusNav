@@ -15,7 +15,7 @@ export default function DashboardStats() {
               <div className="text-2xl font-semibold">4</div>
               <div className="mt-2 flex items-center gap-1 text-xs text-emerald-600">
                 <TrendingUp className="size-3" />
-                <span>8%</span>
+                <span >8% from yesterday</span>
               </div>
             </CardContent>
           </Card>
@@ -40,9 +40,9 @@ export default function DashboardStats() {
                 Busy Zones
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className='text-orange-300'>
               <div className="text-2xl font-semibold">5</div>
-              <p className="mt-2 text-xs text-muted-foreground">Canteen,Library+3</p>
+              <p className="mt-2 text-xs ">Canteen,Library+3</p>
             </CardContent>
           </Card>
 

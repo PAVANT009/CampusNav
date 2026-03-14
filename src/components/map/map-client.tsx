@@ -259,7 +259,7 @@ export default function MapClient() {
         } else {
           setRoute(null)
         }
-      } catch (error) {
+      } catch {
         setRoute(null)
         setRouteError("Unable to load route right now.")
       } finally {
@@ -476,8 +476,7 @@ export default function MapClient() {
                         setPointName("")
                         setPointLat("")
                         setPointLng("")
-                        let toastId: string | number
-                        toastId = goeyToast.success("Map point added", {
+                        const toastId = goeyToast.success("Map point added", {
                           description: "Saved to your private map.",
                           action: {
                             label: "Cancel",
@@ -487,8 +486,7 @@ export default function MapClient() {
                       }
                     } catch {
                       setPointError("Unable to save point.")
-                      let toastId: string | number
-                      toastId = goeyToast.error("Failed to add point", {
+                      const toastId = goeyToast.error("Failed to add point", {
                         description: "Please try again.",
                         action: {
                           label: "Cancel",
@@ -553,11 +551,6 @@ export default function MapClient() {
           destinations={destinations}
           selectedId={selectedId}
           onSelect={setSelectedId}
-          onClear={() => {
-            setSelectedId(null)
-            setRoute(null)
-            setRouteError(null)
-          }}
           loading={routeLoading}
         />
         {mounted && bounds && (

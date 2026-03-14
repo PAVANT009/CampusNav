@@ -14,26 +14,19 @@ interface Props {
  const pages = [
     {
         label: "Dashboard",
-        href: "/",
+        href: "/dashboard",
     },
     {
         label: "AI Agent",
-        href: '/agent',
+        href: '/chat',
     },
     {
-        label: "Categories",
-        href: "/categories",
+        label: "Events",
+        href: "/events",
     },
     {
-        label: "Analytics",
-    },
-    {
-        label: "Notifications",
-        href: "/notifications",
-    },
-    {
-        label: "Upgrade",
-        href: "/upgrade",
+        label: "Settings",
+        href: "/settings",
     },
 ]
 
@@ -114,7 +107,7 @@ const filteredPages = useMemo(() => {
             </CommandItem>
           ))}
         </CommandGroup>
-                <CommandGroup heading="agents">
+                <CommandGroup heading="events">
                     <CommandEmpty>
                         <span className="text-muted-foreground text-sm">
                             No agents found

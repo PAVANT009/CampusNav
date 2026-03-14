@@ -21,7 +21,7 @@ export default function QuickActionsCard() {
           href="/events?filter=today"
           className="block rounded-md border border-border/60 px-3 py-2 hover:bg-accent hover:text-accent-foreground"
         >
-          View today's events
+          View today&apos;s events
         </Link>
         <Link
           href="/map"

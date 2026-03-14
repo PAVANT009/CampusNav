@@ -14,7 +14,6 @@ type MapFindProps = {
   destinations: Destination[]
   selectedId: string | null
   onSelect: (id: string) => void
-  onClear: () => void
   loading?: boolean
 }
 
@@ -22,7 +21,6 @@ export default function MapFind({
   destinations,
   selectedId,
   onSelect,
-  onClear,
   loading = false,
 }: MapFindProps) {
   const [commandOpen, setCommandOpen] = useState(false)

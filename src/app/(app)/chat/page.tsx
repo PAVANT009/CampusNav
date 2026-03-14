@@ -134,8 +134,7 @@ export default function Page() {
             }
             if (parsed.type === "tool" && parsed.status && parsed.message) {
               if (parsed.status === "success") {
-                let toastId: string | number
-                toastId = goeyToast.success(parsed.message, {
+                const toastId = goeyToast.success(parsed.message, {
                   description: "Saved successfully.",
                   action: {
                     label: "Cancel",
@@ -143,8 +142,7 @@ export default function Page() {
                   },
                 })
               } else {
-                let toastId: string | number
-                toastId = goeyToast.error(parsed.message, {
+                const toastId = goeyToast.error(parsed.message, {
                   description: "Please try again.",
                   action: {
                     label: "Cancel",
@@ -189,7 +187,7 @@ export default function Page() {
         <div>
           <p className="text-xl font-semibold text-foreground">Chat</p>
           <p className="text-sm text-muted-foreground">
-            Conversation ID: {conversationId ?? "Creating..."}
+            {conversationId ? "" : "Creating..."}
           </p>
         </div>
         <Button
@@ -210,7 +208,7 @@ export default function Page() {
       <div className="flex min-h-[50vh] flex-1 flex-col gap-3 rounded-xl border border-border bg-card p-4">
         {messages.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            Start the conversation. No history is shown at the beginning.
+            Start the conversation. 
           </p>
         ) : (
           messages.map((message, index) => (
