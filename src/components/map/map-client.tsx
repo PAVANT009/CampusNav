@@ -72,7 +72,6 @@ export default function MapClient() {
   const [pointName, setPointName] = useState("")
   const [pointLat, setPointLat] = useState("")
   const [pointLng, setPointLng] = useState("")
-  const [pointPublic, setPointPublic] = useState(false)
   const [savingPoint, setSavingPoint] = useState(false)
   const [pointError, setPointError] = useState<string | null>(null)
 
@@ -157,23 +156,7 @@ export default function MapClient() {
     return position ?? [12.9716, 77.5946]
   }, [position])
 
-  const destinations = useMemo(() => {
-    const staticPoints = [
-      { id: "block-28", name: "Block 28", lat: 31.25261194951896, lng: 75.70372940151643 },
-      { id: "block-27", name: "Block 27", lat: 31.25259857065149, lng: 75.70329120592311 },
-      { id: "block-26", name: "Block 26", lat: 31.25261194951896, lng: 75.70286866017241 },
-      { id: "library", name: "Library", lat: 31.252081678342265, lng: 75.70406046377747 },
-      { id: "block-37", name: "Block 37", lat: 31.251907952465444, lng: 75.70350923530131 },
-      { id: "block-36", name: "Block 36", lat: 31.25171321883544, lng: 75.70382813636337 },
-      { id: "block-35", name: "Block 35", lat: 31.251419267088608, lng: 75.70416843514994 },
-      { id: "lovely-bakery", name: "Lovely Bakery", lat: 31.251678975097033, lng: 75.70198085284099 },
-      { id: "sports-center", name: "Sports Center", lat: 31.250905122375816, lng: 75.70218657932475 },
-      { id: "gate-parking", name: "Lpu Main Gate Parking", lat: 31.25985274967803, lng: 75.70623290638696 },
-      { id: "uni-health-center", name: "Uni Health Center", lat: 31.257949059343144, lng: 75.70685846191137 },
-    ]
-
-    return [...customPoints, ...staticPoints]
-  }, [customPoints])
+  const destinations = useMemo(() => customPoints, [customPoints])
 
   useEffect(() => {
     if (!position || !selectedId) return
@@ -249,7 +232,7 @@ export default function MapClient() {
             onChange={(event) => setPointLng(event.target.value)}
           />
         </div>
-        <label className="flex items-center gap-2 text-xs text-muted-foreground">
+        {/* <label className="flex items-center gap-2 text-xs text-muted-foreground">
           <input
             type="checkbox"
             className="h-4 w-4 rounded border-border"
@@ -257,7 +240,7 @@ export default function MapClient() {
             onChange={(event) => setPointPublic(event.target.checked)}
           />
           Public
-        </label>
+        </label> */}
         <Button
           className="h-9"
           disabled={savingPoint || !pointName.trim() || !pointLat || !pointLng}
@@ -278,7 +261,7 @@ export default function MapClient() {
                   name: pointName.trim(),
                   lat,
                   lng,
-                  isPublic: pointPublic,
+                  isPublic: false,
                 }),
               })
               if (!response.ok) {
@@ -288,11 +271,12 @@ export default function MapClient() {
                 point?: { id: string; name: string; lat: number; lng: number }
               }
               if (data.point) {
-                setCustomPoints((prev) => [data.point, ...prev])
+                setCustomPoints((prev) =>
+                  data.point ? [data.point, ...prev] : prev
+                )
                 setPointName("")
                 setPointLat("")
                 setPointLng("")
-                setPointPublic(false)
               }
             } catch {
               setPointError("Unable to save point.")

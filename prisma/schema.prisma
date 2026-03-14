@@ -130,6 +130,7 @@ model Event {
 
 
 
+
 // enum Visibility {
 //   PRIVATE
 //   PUBLIC
