@@ -81,6 +81,14 @@ export default function SettingsPage() {
               placeholder="Enter your name"
             />
           </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm text-muted-foreground">University</label>
+            <Input
+              value={"Lovely Professional University"}
+              className="cursor-not-allowed disabled:pointer-events-auto"
+              disabled
+            />
+          </div>
           <div className="flex justify-end">
             <Button onClick={handleSave} disabled={isSaving}>
               {isSaving ? "Saving..." : "Save"}

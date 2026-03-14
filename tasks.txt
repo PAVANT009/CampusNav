@@ -1,0 +1,3 @@
+create a basic chat app where user no need to see history at the start of the convo you generate a id and then you eill save it as convoid 
+also you need to add a add point in the map in there you should ask user name and lang and lat 
+complete the whole backend 
