@@ -25,6 +25,7 @@ model User {
   sessions Session[]
   accounts Account[]
   events   Event[]
+  mapPoints MapPoint[]
   @@map("users")
 }
 

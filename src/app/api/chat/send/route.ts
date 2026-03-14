@@ -3,6 +3,23 @@ import { GoogleGenerativeAI } from "@google/generative-ai"
 import db from "@/lib/db"
 import { auth } from "@/lib/auth"
 
+const coordinatePattern = /(-?\d+(?:\.\d+)?)[,\s]+(-?\d+(?:\.\d+)?)/i
+
+const extractPointFromText = (text: string) => {
+  const match = text.match(coordinatePattern)
+  if (!match) return null
+  const lat = Number(match[1])
+  const lng = Number(match[2])
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null
+  const after = text.slice((match.index ?? 0) + match[0].length).trim()
+  const before = text.slice(0, match.index ?? 0).trim()
+  const name = (after || before || "")
+    .replace(/^(add|create|point|map|location|at)\s+/i, "")
+    .trim()
+  if (!name) return null
+  return { name, lat, lng }
+}
+
 const functionDeclarations = [
   {
     name: "createEvent",
@@ -136,6 +153,7 @@ export async function POST(req: Request) {
 
       const finalResponse = await result.response
       const functionCalls = finalResponse.functionCalls()
+      let toolHandled = false
 
       if (functionCalls && functionCalls.length > 0) {
         const call = functionCalls[0]
@@ -154,6 +172,7 @@ export async function POST(req: Request) {
         }
 
         if (call.name === "createEvent" && args) {
+          toolHandled = true
           try {
             const parsedDate = new Date(args.date)
             if (Number.isNaN(parsedDate.getTime())) {
@@ -187,12 +206,18 @@ export async function POST(req: Request) {
         }
 
         if (call.name === "createMapPoint" && args) {
+          toolHandled = true
           try {
+            const lat = Number(args.lat)
+            const lng = Number(args.lng)
+            if (!Number.isFinite(lat) || !Number.isFinite(lng) || !args.name) {
+              throw new Error("Invalid map point payload")
+            }
             const point = await db.mapPoint.create({
               data: {
                 name: args.name,
-                lat: args.lat,
-                lng: args.lng,
+                lat,
+                lng,
                 isPublic: args.isPublic ?? false,
                 userId,
               },
@@ -203,6 +228,36 @@ export async function POST(req: Request) {
               message: `Map point "${point.name}" added.`,
             })
           } catch (error) {
+            console.error("[DB] Failed to add map point:", error)
+            sendEvent({
+              type: "tool",
+              status: "error",
+              message: "Failed to add map point.",
+            })
+          }
+        }
+      }
+
+      if (!toolHandled) {
+        const extracted = extractPointFromText(content)
+        if (extracted) {
+          try {
+            const point = await db.mapPoint.create({
+              data: {
+                name: extracted.name,
+                lat: extracted.lat,
+                lng: extracted.lng,
+                isPublic: false,
+                userId,
+              },
+            })
+            sendEvent({
+              type: "tool",
+              status: "success",
+              message: `Map point "${point.name}" added.`,
+            })
+          } catch (error) {
+            console.error("[DB] Failed to add map point (fallback):", error)
             sendEvent({
               type: "tool",
               status: "error",

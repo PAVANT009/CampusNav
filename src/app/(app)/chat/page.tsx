@@ -129,9 +129,13 @@ export default function Page() {
             }
             if (parsed.type === "tool" && parsed.status && parsed.message) {
               if (parsed.status === "success") {
-                goeyToast.success(parsed.message)
+                goeyToast.success(parsed.message, {
+                  description: "Saved successfully.",
+                })
               } else {
-                goeyToast.error(parsed.message)
+                goeyToast.error(parsed.message, {
+                  description: "Please try again.",
+                })
               }
             }
           } catch {
