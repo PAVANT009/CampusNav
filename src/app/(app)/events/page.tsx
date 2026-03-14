@@ -63,6 +63,12 @@ export default function Page() {
   const normalizedQuery = searchQuery.trim().toLowerCase()
 
   React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const filter = new URLSearchParams(window.location.search).get("filter")
+      if (filter === "today") {
+        setActiveFilter("Today")
+      }
+    }
     const loadEvents = async () => {
       const response = await fetch("/api/events")
       if (!response.ok) return

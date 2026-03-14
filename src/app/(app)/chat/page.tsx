@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { goeyToast } from "@/components/ui/goey-toaster"
@@ -19,6 +19,8 @@ export default function Page() {
   const [draft, setDraft] = useState("")
   const [sending, setSending] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [initialPromptSent, setInitialPromptSent] = useState(false)
+  const [initialPrompt, setInitialPrompt] = useState<string | null>(null)
 
   const createConversation = async () => {
     setCreating(true)
@@ -62,16 +64,19 @@ export default function Page() {
     }
   }, [])
 
-  const handleSend = async (event: React.FormEvent) => {
-    event.preventDefault()
-    if (!draft.trim() || !conversationId || sending) return
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim() || !conversationId || sending) return
 
     const nextMessage: ChatMessage = {
       role: "user",
-      content: draft.trim(),
+      content: text.trim(),
     }
 
-    setMessages((prev) => [...prev, nextMessage, { role: "assistant", content: "" }])
+    setMessages((prev) => [
+      ...prev,
+      nextMessage,
+      { role: "assistant", content: "" },
+    ])
     setDraft("")
     setSending(true)
 
@@ -156,7 +161,27 @@ export default function Page() {
     } finally {
       setSending(false)
     }
+  }, [conversationId, sending])
+
+  const handleSend = async (event: React.FormEvent) => {
+    event.preventDefault()
+    await sendMessage(draft)
   }
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const prompt = new URLSearchParams(window.location.search).get("prompt")
+    if (prompt) {
+      setInitialPrompt(prompt)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!initialPrompt || initialPromptSent || !conversationId) return
+    if (messages.length > 0) return
+    setInitialPromptSent(true)
+    sendMessage(initialPrompt)
+  }, [conversationId, initialPrompt, initialPromptSent, messages.length, sendMessage])
 
   return (
     <div className="flex flex-1 flex-col gap-4 px-6 pt-8">
