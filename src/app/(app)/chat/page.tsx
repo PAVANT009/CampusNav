@@ -129,12 +129,22 @@ export default function Page() {
             }
             if (parsed.type === "tool" && parsed.status && parsed.message) {
               if (parsed.status === "success") {
-                goeyToast.success(parsed.message, {
+                let toastId: string | number
+                toastId = goeyToast.success(parsed.message, {
                   description: "Saved successfully.",
+                  action: {
+                    label: "Cancel",
+                    onClick: () => goeyToast.dismiss(toastId),
+                  },
                 })
               } else {
-                goeyToast.error(parsed.message, {
+                let toastId: string | number
+                toastId = goeyToast.error(parsed.message, {
                   description: "Please try again.",
+                  action: {
+                    label: "Cancel",
+                    onClick: () => goeyToast.dismiss(toastId),
+                  },
                 })
               }
             }

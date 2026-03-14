@@ -9,6 +9,11 @@ export function ThemeToaster() {
   const toastTheme = resolvedTheme === "dark" ? "dark" : "light";
 
   return (
-    <GoeyToaster position="top-right" duration={4000} theme={toastTheme} />
+    <GoeyToaster
+      position="top-right"
+      duration={4000}
+      theme={toastTheme}
+      offset={24}
+    />
   );
 }

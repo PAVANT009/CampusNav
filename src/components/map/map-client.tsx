@@ -3,12 +3,22 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import dynamic from "next/dynamic"
-import { useMap } from "react-leaflet"
+import { useMap, useMapEvents } from "react-leaflet"
 
 import "leaflet/dist/leaflet.css"
 import MapFind from "./map-find"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog"
+import { Plus } from "lucide-react"
+import { goeyToast } from "../ui/goey-toaster"
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -28,6 +38,10 @@ const Polyline = dynamic(
 )
 const CircleMarker = dynamic(
   () => import("react-leaflet").then((mod) => mod.CircleMarker),
+  { ssr: false }
+)
+const Circle = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Circle),
   { ssr: false }
 )
 const Popup = dynamic(
@@ -56,7 +70,49 @@ function MapUpdater({
   return null
 }
 
+function MapRightClickCopy() {
+  useMapEvents({
+    contextmenu: (event) => {
+      const { lat, lng } = event.latlng
+      const coords = `${lat}, ${lng}`
+      if (navigator?.clipboard?.writeText) {
+        navigator.clipboard
+          .writeText(coords)
+          .then(() => {
+            const toastId = goeyToast.success("Coordinates copied", {
+              description: coords,
+              action: {
+                label: "Cancel",
+                onClick: () => goeyToast.dismiss(toastId),
+              },
+            })
+          })
+          .catch(() => {
+            const toastId = goeyToast.error("Copy failed", {
+              description: coords,
+              action: {
+                label: "Cancel",
+                onClick: () => goeyToast.dismiss(toastId),
+              },
+            })
+          })
+      } else {
+        const toastId = goeyToast.error("Clipboard unavailable", {
+          description: coords,
+          action: {
+            label: "Cancel",
+            onClick: () => goeyToast.dismiss(toastId),
+          },
+        })
+      }
+    },
+  })
+
+  return null
+}
+
 export default function MapClient() {
+  const [open,setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [position, setPosition] = useState<[number, number] | null>(null)
   const [bounds, setBounds] = useState<[[number, number], [number, number]] | null>(null)
@@ -157,6 +213,18 @@ export default function MapClient() {
   }, [position])
 
   const destinations = useMemo(() => customPoints, [customPoints])
+  const busyZones = useMemo(
+    () => [
+      {
+        id: "busy-spot-1",
+        name: "High activity area",
+        lat: 31.251736929338826,
+        lng: 75.70553183555604,
+        radius: 30,
+      },
+    ],
+    []
+  )
 
   useEffect(() => {
     if (!position || !selectedId) return
@@ -204,8 +272,8 @@ export default function MapClient() {
 
   return (
     <div className="flex-1 p-4 md:p-6">
-      <div className="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4">
-        <div className="min-w-[160px] flex-1">
+      {/* <div className="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4"> */}
+        {/* <div className="min-w-[160px] flex-1">
           <label className="text-xs text-muted-foreground">Name</label>
           <Input
             className="mt-1 h-9"
@@ -213,8 +281,8 @@ export default function MapClient() {
             value={pointName}
             onChange={(event) => setPointName(event.target.value)}
           />
-        </div>
-        <div className="min-w-[120px]">
+        </div> */}
+        {/* <div className="min-w-[120px]">
           <label className="text-xs text-muted-foreground">Lat</label>
           <Input
             className="mt-1 h-9"
@@ -222,8 +290,8 @@ export default function MapClient() {
             value={pointLat}
             onChange={(event) => setPointLat(event.target.value)}
           />
-        </div>
-        <div className="min-w-[120px]">
+        </div> */}
+        {/* <div className="min-w-[120px]">
           <label className="text-xs text-muted-foreground">Lng</label>
           <Input
             className="mt-1 h-9"
@@ -231,7 +299,7 @@ export default function MapClient() {
             value={pointLng}
             onChange={(event) => setPointLng(event.target.value)}
           />
-        </div>
+        </div> */}
         {/* <label className="flex items-center gap-2 text-xs text-muted-foreground">
           <input
             type="checkbox"
@@ -241,7 +309,7 @@ export default function MapClient() {
           />
           Public
         </label> */}
-        <Button
+        {/* <Button
           className="h-9"
           disabled={savingPoint || !pointName.trim() || !pointLat || !pointLng}
           onClick={async () => {
@@ -286,10 +354,163 @@ export default function MapClient() {
           }}
         >
           {savingPoint ? "Saving..." : "Add point"}
-        </Button>
-        {pointError && (
-          <span className="text-xs text-destructive">{pointError}</span>
-        )}
+        </Button> */}
+
+      {/* </div> */}
+      <div className="w-full flex flex-row justify-between">
+        <span>Maps</span>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus />
+              Add point
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add map point</DialogTitle>
+              <DialogDescription>
+                Add a private point to your map.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-3">
+              <div className="grid gap-2">
+                <label className="text-sm text-muted-foreground">Name</label>
+                <Input
+                  placeholder="Food Factory"
+                  value={pointName}
+                  onChange={(event) => setPointName(event.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-2">
+                  <label className="text-sm text-muted-foreground">Lat</label>
+                  <Input
+                    placeholder="31.2526"
+                    value={pointLat}
+                    onChange={(event) => setPointLat(event.target.value)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <label className="text-sm text-muted-foreground">Lng</label>
+                  <Input
+                    placeholder="75.7037"
+                    value={pointLng}
+                    onChange={(event) => setPointLng(event.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Paste coordinates like 31.2529, 75.7054</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      const text = await navigator.clipboard.readText()
+                      const match = text
+                        .trim()
+                        .match(/(-?\d+(?:\.\d+)?)[,\s]+(-?\d+(?:\.\d+)?)/)
+                      if (!match) {
+                        goeyToast.error("Paste failed", {
+                          description: "Clipboard doesn't look like coordinates.",
+                        })
+                        return
+                      }
+                      setPointLat(match[1])
+                      setPointLng(match[2])
+                    } catch {
+                      goeyToast.error("Paste failed", {
+                        description: "Clipboard access denied.",
+                      })
+                    }
+                  }}
+                >
+                  Paste
+                </Button>
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  disabled={
+                    savingPoint ||
+                    !pointName.trim() ||
+                    !pointLat.trim() ||
+                    !pointLng.trim()
+                  }
+                  onClick={async () => {
+                    const lat = Number(pointLat)
+                    const lng = Number(pointLng)
+                    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+                      setPointError("Enter valid latitude and longitude.")
+                      return
+                    }
+                    setSavingPoint(true)
+                    setPointError(null)
+                    try {
+                      const response = await fetch("/api/map/points", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          name: pointName.trim(),
+                          lat,
+                          lng,
+                        }),
+                      })
+                      if (!response.ok) {
+                        throw new Error("Failed to add point")
+                      }
+                      const data = (await response.json()) as {
+                        point?: {
+                          id: string
+                          name: string
+                          lat: number
+                          lng: number
+                        }
+                      }
+                      if (data.point) {
+                        setCustomPoints((prev) =>
+                          data.point ? [data.point, ...prev] : prev
+                        )
+                        setPointName("")
+                        setPointLat("")
+                        setPointLng("")
+                        let toastId: string | number
+                        toastId = goeyToast.success("Map point added", {
+                          description: "Saved to your private map.",
+                          action: {
+                            label: "Cancel",
+                            onClick: () => goeyToast.dismiss(toastId),
+                          },
+                        })
+                      }
+                    } catch {
+                      setPointError("Unable to save point.")
+                      let toastId: string | number
+                      toastId = goeyToast.error("Failed to add point", {
+                        description: "Please try again.",
+                        action: {
+                          label: "Cancel",
+                          onClick: () => goeyToast.dismiss(toastId),
+                        },
+                      })
+                    } finally {
+                      setSavingPoint(false)
+                      setOpen(false)
+
+                    }
+                  }}
+                >
+                  {savingPoint ? "Saving..." : "Save point"}
+                </Button>
+              </div>
+              {pointError && (
+                <p className="text-xs text-destructive">{pointError}</p>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
       <div className="mb-4 flex flex-wrap gap-2">
         {destinations.slice(0,8).map((item) => (
@@ -319,8 +540,7 @@ export default function MapClient() {
         </button>
         {routeLoading && (
           <span className="self-center text-xs text-muted-foreground">
-            Calculating route…
-          </span>
+            Calculating route...</span>
         )}
         {routeError && (
           <span className="self-center text-xs text-destructive">
@@ -354,6 +574,7 @@ export default function MapClient() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <MapUpdater center={center} bounds={bounds} zoom={userZoom} />
+            <MapRightClickCopy />
             <CircleMarker
               center={center}
               radius={8}
@@ -366,6 +587,20 @@ export default function MapClient() {
               <Marker key={item.id} position={[item.lat, item.lng]}>
                 <Popup>{item.name}</Popup>
               </Marker>
+            ))}
+            {busyZones.map((zone) => (
+              <Circle
+                key={zone.id}
+                center={[zone.lat, zone.lng]}
+                radius={zone.radius}
+                pathOptions={{
+                  color: "#ef4444",
+                  fillColor: "#f87171",
+                  fillOpacity: 0.25,
+                }}
+              >
+                <Popup>{zone.name}</Popup>
+              </Circle>
             ))}
             {route && (
               <Polyline positions={route} pathOptions={{ color: "#0f172a", weight: 4 }} />
