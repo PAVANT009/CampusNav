@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { goeyToast } from "@/components/ui/goey-toaster"
+import { gooeyToast } from "@/components/ui/goey-toaster"
 
 type ChatMessage = {
   id?: string
@@ -134,19 +134,19 @@ export default function Page() {
             }
             if (parsed.type === "tool" && parsed.status && parsed.message) {
               if (parsed.status === "success") {
-                const toastId = goeyToast.success(parsed.message, {
+                const toastId = gooeyToast.success(parsed.message, {
                   description: "Saved successfully.",
                   action: {
                     label: "Cancel",
-                    onClick: () => goeyToast.dismiss(toastId),
+                    onClick: () => gooeyToast.dismiss(toastId),
                   },
                 })
               } else {
-                const toastId = goeyToast.error(parsed.message, {
+                const toastId = gooeyToast.error(parsed.message, {
                   description: "Please try again.",
                   action: {
                     label: "Cancel",
-                    onClick: () => goeyToast.dismiss(toastId),
+                    onClick: () => gooeyToast.dismiss(toastId),
                   },
                 })
               }

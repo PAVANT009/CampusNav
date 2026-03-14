@@ -18,7 +18,7 @@ import {
   DialogTrigger,
 } from "../ui/dialog"
 import { Plus } from "lucide-react"
-import { goeyToast } from "../ui/goey-toaster"
+import { gooeyToast } from "../ui/goey-toaster"
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -79,29 +79,29 @@ function MapRightClickCopy() {
         navigator.clipboard
           .writeText(coords)
           .then(() => {
-            const toastId = goeyToast.success("Coordinates copied", {
+            const toastId = gooeyToast.success("Coordinates copied", {
               description: coords,
               action: {
                 label: "Cancel",
-                onClick: () => goeyToast.dismiss(toastId),
+                onClick: () => gooeyToast.dismiss(toastId),
               },
             })
           })
           .catch(() => {
-            const toastId = goeyToast.error("Copy failed", {
+            const toastId = gooeyToast.error("Copy failed", {
               description: coords,
               action: {
                 label: "Cancel",
-                onClick: () => goeyToast.dismiss(toastId),
+                onClick: () => gooeyToast.dismiss(toastId),
               },
             })
           })
       } else {
-        const toastId = goeyToast.error("Clipboard unavailable", {
+        const toastId = gooeyToast.error("Clipboard unavailable", {
           description: coords,
           action: {
             label: "Cancel",
-            onClick: () => goeyToast.dismiss(toastId),
+            onClick: () => gooeyToast.dismiss(toastId),
           },
         })
       }
@@ -413,7 +413,7 @@ export default function MapClient() {
                         .trim()
                         .match(/(-?\d+(?:\.\d+)?)[,\s]+(-?\d+(?:\.\d+)?)/)
                       if (!match) {
-                        goeyToast.error("Paste failed", {
+                        gooeyToast.error("Paste failed", {
                           description: "Clipboard doesn't look like coordinates.",
                         })
                         return
@@ -421,7 +421,7 @@ export default function MapClient() {
                       setPointLat(match[1])
                       setPointLng(match[2])
                     } catch {
-                      goeyToast.error("Paste failed", {
+                      gooeyToast.error("Paste failed", {
                         description: "Clipboard access denied.",
                       })
                     }
@@ -476,21 +476,21 @@ export default function MapClient() {
                         setPointName("")
                         setPointLat("")
                         setPointLng("")
-                        const toastId = goeyToast.success("Map point added", {
+                        const toastId = gooeyToast.success("Map point added", {
                           description: "Saved to your private map.",
                           action: {
                             label: "Cancel",
-                            onClick: () => goeyToast.dismiss(toastId),
+                            onClick: () => gooeyToast.dismiss(toastId),
                           },
                         })
                       }
                     } catch {
                       setPointError("Unable to save point.")
-                      const toastId = goeyToast.error("Failed to add point", {
+                      const toastId = gooeyToast.error("Failed to add point", {
                         description: "Please try again.",
                         action: {
                           label: "Cancel",
-                          onClick: () => goeyToast.dismiss(toastId),
+                          onClick: () => gooeyToast.dismiss(toastId),
                         },
                       })
                     } finally {

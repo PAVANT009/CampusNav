@@ -5,7 +5,7 @@ import { format, isSameDay, parseISO } from "date-fns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { goeyToast } from "@/components/ui/goey-toaster"
+import { gooeyToast } from "@/components/ui/goey-toaster"
 import {
   Select,
   SelectContent,
@@ -186,11 +186,11 @@ export default function Page() {
       setEventLocation("")
       setEventAttendees("")
       setEventCategory("")
-      goeyToast.success("Event created", {
+      gooeyToast.success("Event created", {
         description: "Saved to your events list.",
       })
     } catch {
-      goeyToast.error("Failed to create event", {
+      gooeyToast.error("Failed to create event", {
         description: "Please try again.",
       })
     } finally {
