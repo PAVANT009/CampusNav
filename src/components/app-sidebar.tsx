@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -54,29 +54,28 @@ export function AppSidebar() {
   const { state,toggleSidebar } = useSidebar()
   const isCollapsed = state === "collapsed"
   const { data: session } = useSession()
-  const [displayName, setDisplayName] = useState("Campus User")
-
-  useEffect(() => {
-    const stored =
-      typeof window !== "undefined"
-        ? localStorage.getItem("profileName")
-        : null
-    const nextName =
-      stored ||
-      session?.user?.name ||
-      session?.user?.email ||
-      "Campus User"
-    setDisplayName(nextName)
-  }, [session?.user?.email, session?.user?.name])
+  const [profileVersion, setProfileVersion] = useState(0)
 
   useEffect(() => {
     const handler = () => {
-      const stored = localStorage.getItem("profileName")
-      if (stored) setDisplayName(stored)
+      setProfileVersion((version) => version + 1)
     }
     window.addEventListener("profile-updated", handler)
     return () => window.removeEventListener("profile-updated", handler)
   }, [])
+
+  const displayName = useMemo(() => {
+    const stored =
+      typeof window !== "undefined"
+        ? localStorage.getItem("profileName")
+        : null
+    return (
+      stored ||
+      session?.user?.name ||
+      session?.user?.email ||
+      "Campus User"
+    )
+  }, [profileVersion, session?.user?.email, session?.user?.name])
 
   return (
     <Sidebar collapsible="icon" className="font-mono">
