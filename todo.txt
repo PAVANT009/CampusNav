@@ -1,10 +1,9 @@
-add navbar 
-add theme cxt
-add toast cxt
-implement leaf let 
+done: add navbar
+done: add theme cxt
+done: add toast cxt
+done: implement leaf let
 
 
 
 
 /// basic assumptions
-

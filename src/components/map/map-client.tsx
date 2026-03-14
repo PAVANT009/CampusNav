@@ -7,6 +7,8 @@ import { useMap } from "react-leaflet"
 
 import "leaflet/dist/leaflet.css"
 import MapFind from "./map-find"
+import { Button } from "../ui/button"
+import { Input } from "../ui/input"
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -64,9 +66,33 @@ export default function MapClient() {
   const [routeLoading, setRouteLoading] = useState(false)
   const [routeError, setRouteError] = useState<string | null>(null)
   const [routeCache, setRouteCache] = useState<Record<string, [number, number][]>>({})
+  const [customPoints, setCustomPoints] = useState<
+    { id: string; name: string; lat: number; lng: number }[]
+  >([])
+  const [pointName, setPointName] = useState("")
+  const [pointLat, setPointLat] = useState("")
+  const [pointLng, setPointLng] = useState("")
+  const [pointPublic, setPointPublic] = useState(false)
+  const [savingPoint, setSavingPoint] = useState(false)
+  const [pointError, setPointError] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    const loadPoints = async () => {
+      const response = await fetch("/api/map/points")
+      if (!response.ok) return
+      const data = (await response.json()) as {
+        points?: { id: string; name: string; lat: number; lng: number }[]
+      }
+      if (data.points) {
+        setCustomPoints(data.points)
+      }
+    }
+
+    loadPoints()
   }, [])
 
   useEffect(() => {
@@ -131,9 +157,8 @@ export default function MapClient() {
     return position ?? [12.9716, 77.5946]
   }, [position])
 
-  const destinations = useMemo(
-    () => [
-        // 31.257949059343144, 75.70685846191137
+  const destinations = useMemo(() => {
+    const staticPoints = [
       { id: "block-28", name: "Block 28", lat: 31.25261194951896, lng: 75.70372940151643 },
       { id: "block-27", name: "Block 27", lat: 31.25259857065149, lng: 75.70329120592311 },
       { id: "block-26", name: "Block 26", lat: 31.25261194951896, lng: 75.70286866017241 },
@@ -143,11 +168,12 @@ export default function MapClient() {
       { id: "block-35", name: "Block 35", lat: 31.251419267088608, lng: 75.70416843514994 },
       { id: "lovely-bakery", name: "Lovely Bakery", lat: 31.251678975097033, lng: 75.70198085284099 },
       { id: "sports-center", name: "Sports Center", lat: 31.250905122375816, lng: 75.70218657932475 },
-      {id: "gate-parking", name: "Lpu Main Gate Parking ", lat : 31.25985274967803, lng: 75.70623290638696},
-      {id: "Uni health center ", name: "Uni Health Center", lat : 31.257949059343144, lng: 75.70685846191137}
-    ],  
-    []
-  )
+      { id: "gate-parking", name: "Lpu Main Gate Parking", lat: 31.25985274967803, lng: 75.70623290638696 },
+      { id: "uni-health-center", name: "Uni Health Center", lat: 31.257949059343144, lng: 75.70685846191137 },
+    ]
+
+    return [...customPoints, ...staticPoints]
+  }, [customPoints])
 
   useEffect(() => {
     if (!position || !selectedId) return
@@ -195,6 +221,92 @@ export default function MapClient() {
 
   return (
     <div className="flex-1 p-4 md:p-6">
+      <div className="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4">
+        <div className="min-w-[160px] flex-1">
+          <label className="text-xs text-muted-foreground">Name</label>
+          <Input
+            className="mt-1 h-9"
+            placeholder="Point name"
+            value={pointName}
+            onChange={(event) => setPointName(event.target.value)}
+          />
+        </div>
+        <div className="min-w-[120px]">
+          <label className="text-xs text-muted-foreground">Lat</label>
+          <Input
+            className="mt-1 h-9"
+            placeholder="31.2526"
+            value={pointLat}
+            onChange={(event) => setPointLat(event.target.value)}
+          />
+        </div>
+        <div className="min-w-[120px]">
+          <label className="text-xs text-muted-foreground">Lng</label>
+          <Input
+            className="mt-1 h-9"
+            placeholder="75.7037"
+            value={pointLng}
+            onChange={(event) => setPointLng(event.target.value)}
+          />
+        </div>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground">
+          <input
+            type="checkbox"
+            className="h-4 w-4 rounded border-border"
+            checked={pointPublic}
+            onChange={(event) => setPointPublic(event.target.checked)}
+          />
+          Public
+        </label>
+        <Button
+          className="h-9"
+          disabled={savingPoint || !pointName.trim() || !pointLat || !pointLng}
+          onClick={async () => {
+            const lat = Number(pointLat)
+            const lng = Number(pointLng)
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+              setPointError("Enter valid latitude and longitude.")
+              return
+            }
+            setSavingPoint(true)
+            setPointError(null)
+            try {
+              const response = await fetch("/api/map/points", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  name: pointName.trim(),
+                  lat,
+                  lng,
+                  isPublic: pointPublic,
+                }),
+              })
+              if (!response.ok) {
+                throw new Error("Failed to add point")
+              }
+              const data = (await response.json()) as {
+                point?: { id: string; name: string; lat: number; lng: number }
+              }
+              if (data.point) {
+                setCustomPoints((prev) => [data.point, ...prev])
+                setPointName("")
+                setPointLat("")
+                setPointLng("")
+                setPointPublic(false)
+              }
+            } catch {
+              setPointError("Unable to save point.")
+            } finally {
+              setSavingPoint(false)
+            }
+          }}
+        >
+          {savingPoint ? "Saving..." : "Add point"}
+        </Button>
+        {pointError && (
+          <span className="text-xs text-destructive">{pointError}</span>
+        )}
+      </div>
       <div className="mb-4 flex flex-wrap gap-2">
         {destinations.slice(0,8).map((item) => (
           <button

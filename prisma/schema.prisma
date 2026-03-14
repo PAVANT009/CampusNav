@@ -24,6 +24,7 @@ model User {
 
   sessions Session[]
   accounts Account[]
+  events   Event[]
   @@map("users")
 }
 
@@ -71,6 +72,59 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@map("verifications")
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+
+  messages Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  role           String
+  content        String
+  createdAt      DateTime     @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model MapPoint {
+  id        String   @id @default(cuid())
+  name      String
+  lat       Float
+  lng       Float
+  isPublic  Boolean  @default(true)
+  userId    String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("map_points")
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  name      String
+  date      DateTime
+  startTime String?
+  endTime   String?
+  location  String?
+  category  String?
+  attendees Int      @default(0)
+  status    String   @default("Upcoming")
+  createdAt DateTime @default(now())
+  userId    String?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("events")
 }
 
 
