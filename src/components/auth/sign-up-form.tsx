@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { motion } from "motion/react";
-import { goeyToast } from "goey-toast";
+import { goeyToast } from "@/components/ui/goey-toaster";
 
 type SocialProvider = "google" | "github";
 
