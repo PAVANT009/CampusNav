@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { GoeyToaster } from "@/components/ui/goey-toaster";
+import { GoeyToaster} from "@/components/ui/goey-toaster";
 
 export function ThemeToaster() {
   const { resolvedTheme } = useTheme();
