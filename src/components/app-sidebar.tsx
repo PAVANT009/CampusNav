@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   Bot,
   CalendarDays,
@@ -51,6 +51,7 @@ const handleCLickonDown = (isCollapsed : boolean,toggleSidebar : () => void) => 
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const { state,toggleSidebar } = useSidebar()
   const isCollapsed = state === "collapsed"
   const { data: session } = useSession()
@@ -159,9 +160,10 @@ export function AppSidebar() {
           </DropdownMenuTrigger>
           <DropdownMenuContent side="top" align="start">
             <DropdownMenuItem
-              onSelect={(event) => {
+              onSelect={async (event) => {
                 event.preventDefault()
-                signOut()
+                await signOut()
+                router.push("/sign-in")
               }}
             >
               <LogOut className="size-4" />
