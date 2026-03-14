@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { goeyToast } from "@/components/ui/goey-toaster"
+import { gooeyToast } from "@/components/ui/goey-toaster"
 import { useSession } from "@/lib/auth-client"
 
 export default function SettingsPage() {
@@ -38,11 +38,11 @@ export default function SettingsPage() {
         window.dispatchEvent(new Event("profile-updated"))
       }
 
-      goeyToast.success("Profile updated", {
+      gooeyToast.success("Profile updated", {
         description: "Your name has been saved.",
       })
     } catch (error) {
-      goeyToast.error("Update failed", {
+      gooeyToast.error("Update failed", {
         description: "Please try again.",
       })
     } finally {

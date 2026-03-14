@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { motion } from "motion/react";
-import { goeyToast } from "@/components/ui/goey-toaster";
+import { gooeyToast } from "@/components/ui/goey-toaster";
 import { Logo } from "../shared/logo";
 
 type SocialProvider = "google" | "github";
@@ -32,7 +32,7 @@ export function SignInForm() {
       });
     } catch (error) {
       console.error(`${provider} sign-in error:`, error);
-      goeyToast.error("Sign-in failed", {
+      gooeyToast.error("Sign-in failed", {
         description: `We couldn&apos;t sign you in with ${provider}. Please try again.`,
       });
       setSocialLoading(null);
@@ -56,21 +56,21 @@ export function SignInForm() {
       });
 
       if (result.error) {
-        goeyToast.error("Authentication failed", {
+        gooeyToast.error("Authentication failed", {
           description: result.error.message || "Invalid email or password.",
         });
         setIsLoading(false);
         return;
       }
 
-      goeyToast.success("Welcome back!", {
+      gooeyToast.success("Welcome back!", {
         description: "You have successfully signed in.",
       });
       router.push("/dashboard");
       router.refresh();
     } catch (error) {
       console.error("Sign-in error:", error);
-      goeyToast.error("Something went wrong", {
+      gooeyToast.error("Something went wrong", {
         description: "Please try again in a moment.",
       });
       setIsLoading(false);

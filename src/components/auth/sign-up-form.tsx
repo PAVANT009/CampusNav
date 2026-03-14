@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { motion } from "motion/react";
-import { goeyToast } from "@/components/ui/goey-toaster";
+import { gooeyToast } from "@/components/ui/goey-toaster";
 
 type SocialProvider = "google" | "github";
 
@@ -32,7 +32,7 @@ export function SignUpForm() {
     } catch (error) {
       console.error(`${provider} sign-up error:`, error);
 
-      goeyToast.error("Sign-up failed", {
+      gooeyToast.error("Sign-up failed", {
         description: `We couldn’t create your account using ${provider}. Please try again.`,
       });
 
@@ -52,7 +52,7 @@ export function SignUpForm() {
 
     // Client-side validation
     if (password.length < 8) {
-      goeyToast.error("Weak password", {
+      gooeyToast.error("Weak password", {
         description: "Password must be at least 8 characters long.",
       });
 
@@ -70,7 +70,7 @@ export function SignUpForm() {
       });
 
       if (result.error) {
-        goeyToast.error("Account creation failed", {
+        gooeyToast.error("Account creation failed", {
           description:
             result.error.message ||
             "We couldn&apos;t create your account. Please try again.",
@@ -80,7 +80,7 @@ export function SignUpForm() {
         return;
       }
 
-      goeyToast.success("Account created 🎉", {
+      gooeyToast.success("Account created 🎉", {
         description: "Welcome! Your account has been successfully created.",
       });
 
@@ -89,7 +89,7 @@ export function SignUpForm() {
     } catch (error) {
       console.error("Sign-up error:", error);
 
-      goeyToast.error("Something went wrong", {
+      gooeyToast.error("Something went wrong", {
         description: "Please try again in a moment.",
       });
 
