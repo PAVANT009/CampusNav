@@ -1,10 +1,11 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import { format, isSameDay, parseISO } from "date-fns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { goeyToast } from "@/components/ui/goey-toaster"
 import {
   Select,
   SelectContent,
@@ -29,58 +30,6 @@ const categories = [
   "Cultural",
   "Sports",
   "Workshops",
-  "Near me",
-]
-
-const events = [
-  {
-    id: "hackathon-kickoff",
-    name: "Hackathon kickoff",
-    date: "2026-03-14",
-    startTime: "3:00 pm",
-    endTime: "5:00 pm",
-    location: "Auditorium Hall",
-    category: "Academics",
-    attendees: 120,
-    status: "Live Now",
-    isNearby: true,
-  },
-  {
-    id: "robotics-demo",
-    name: "Robotics demo day",
-    date: "2026-03-14",
-    startTime: "5:30 pm",
-    endTime: "7:00 pm",
-    location: "Engineering Lab 2",
-    category: "Workshops",
-    attendees: 68,
-    status: "Starting Soon",
-    isNearby: false,
-  },
-  {
-    id: "cultural-night",
-    name: "Cultural night rehearsal",
-    date: "2026-03-15",
-    startTime: "6:00 pm",
-    endTime: "8:00 pm",
-    location: "Open Air Theatre",
-    category: "Cultural",
-    attendees: 210,
-    status: "Upcoming",
-    isNearby: true,
-  },
-  {
-    id: "sports-meet",
-    name: "Inter-hostel sports meet",
-    date: "2026-03-16",
-    startTime: "4:00 pm",
-    endTime: "6:30 pm",
-    location: "Main Stadium",
-    category: "Sports",
-    attendees: 300,
-    status: "Upcoming",
-    isNearby: false,
-  },
 ]
 
 type EventItem = {
@@ -97,8 +46,15 @@ type EventItem = {
 }
 
 export default function Page() {
+  const [open,setOpen] = useState(false)
   const [eventDate, setEventDate] = React.useState<Date | undefined>()
   const [eventCategory, setEventCategory] = React.useState<string>("")
+  const [eventName, setEventName] = React.useState("")
+  const [eventStartTime, setEventStartTime] = React.useState("")
+  const [eventEndTime, setEventEndTime] = React.useState("")
+  const [eventLocation, setEventLocation] = React.useState("")
+  const [eventAttendees, setEventAttendees] = React.useState("")
+  const [isSaving, setIsSaving] = React.useState(false)
   const [activeFilter, setActiveFilter] = React.useState("All")
   const [searchQuery, setSearchQuery] = React.useState("")
   const [remoteEvents, setRemoteEvents] = React.useState<EventItem[]>([])
@@ -143,14 +99,11 @@ export default function Page() {
     loadEvents()
   }, [])
 
-  const allEvents = [...remoteEvents, ...events]
+  const allEvents = remoteEvents
 
   const filteredEvents = allEvents.filter((event) => {
     if (activeFilter === "Today") {
       return isSameDay(parseISO(event.date), today)
-    }
-    if (activeFilter === "Near me") {
-      return event.isNearby
     }
     if (activeFilter !== "All" && event.category !== activeFilter) {
       return false
@@ -164,12 +117,88 @@ export default function Page() {
     return haystack.includes(normalizedQuery)
   })
 
+  const handleCreateEvent = async () => {
+    if (!eventName.trim() || !eventDate) return
+    setIsSaving(true)
+    try {
+      const categoryLabel = eventCategory
+        ? eventCategory.charAt(0).toUpperCase() + eventCategory.slice(1)
+        : null
+      const response = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: eventName.trim(),
+          date: format(eventDate, "yyyy-MM-dd"),
+          startTime: eventStartTime || null,
+          endTime: eventEndTime || null,
+          location: eventLocation || null,
+          category: categoryLabel,
+          attendees: eventAttendees ? Number(eventAttendees) : 0,
+          status: "Upcoming",
+        }),
+      })
+      if (!response.ok) {
+        throw new Error("Failed to create event")
+      }
+      const data = (await response.json()) as {
+        event?: {
+          id: string
+          name: string
+          date: string
+          startTime: string | null
+          endTime: string | null
+          location: string | null
+          category: string | null
+          attendees: number
+          status: string
+        }
+      }
+      const createdEvent = data.event
+      if (!createdEvent) {
+        throw new Error("Missing event in response")
+      }
+      setRemoteEvents((prev) => [
+        {
+          id: createdEvent.id,
+          name: createdEvent.name,
+          date: createdEvent.date.slice(0, 10),
+          startTime: createdEvent.startTime ?? "TBD",
+          endTime: createdEvent.endTime ?? "TBD",
+          location: createdEvent.location ?? "TBD",
+          category: createdEvent.category ?? "General",
+          attendees: createdEvent.attendees ?? 0,
+          status: createdEvent.status ?? "Upcoming",
+          isNearby: false,
+        },
+        ...prev,
+      ])
+      setEventName("")
+      setEventDate(undefined)
+      setEventStartTime("")
+      setEventEndTime("")
+      setEventLocation("")
+      setEventAttendees("")
+      setEventCategory("")
+      goeyToast.success("Event created", {
+        description: "Saved to your events list.",
+      })
+    } catch {
+      goeyToast.error("Failed to create event", {
+        description: "Please try again.",
+      })
+    } finally {
+      setIsSaving(false)
+      setOpen(false)
+    }
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-4 px-6 pt-8">
       {/* nav of event */}
       <div className="flex flex-row justify-between">
         <span className="text-xl font-semibold text-foreground">Events</span>
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus />
@@ -189,7 +218,11 @@ export default function Page() {
                 <label className="text-sm text-muted-foreground">
                   Event name
                 </label>
-                <Input placeholder="Hackathon kickoff" />
+                <Input
+                  placeholder="Hackathon kickoff"
+                  value={eventName}
+                  onChange={(event) => setEventName(event.target.value)}
+                />
               </div>
               <div className="grid gap-2">
                 <label className="text-sm text-muted-foreground">Date</label>
@@ -209,14 +242,30 @@ export default function Page() {
                   <label className="text-sm text-muted-foreground">
                     Start time
                   </label>
-                  <Input type="time" />
+                  <Input
+                    type="time"
+                    value={eventStartTime}
+                    onChange={(event) => setEventStartTime(event.target.value)}
+                  />
                 </div>
                 <div className="grid gap-2">
                   <label className="text-sm text-muted-foreground">
                     End time
                   </label>
-                  <Input type="time" />
+                  <Input
+                    type="time"
+                    value={eventEndTime}
+                    onChange={(event) => setEventEndTime(event.target.value)}
+                  />
                 </div>
+              </div>
+              <div className="grid gap-2">
+                <label className="text-sm text-muted-foreground">Location</label>
+                <Input
+                  placeholder="Auditorium Hall"
+                  value={eventLocation}
+                  onChange={(event) => setEventLocation(event.target.value)}
+                />
               </div>
               <div className="grid gap-2">
                 <label className="text-sm text-muted-foreground">Category</label>
@@ -236,10 +285,22 @@ export default function Page() {
                 <label className="text-sm text-muted-foreground">
                   Expected attendees
                 </label>
-                <Input type="number" min={0} placeholder="120" />
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="120"
+                  value={eventAttendees}
+                  onChange={(event) => setEventAttendees(event.target.value)}
+                />
               </div>
               <div className="flex justify-end">
-                <Button type="button">Save draft</Button>
+                <Button
+                  type="button"
+                  onClick={handleCreateEvent}
+                  disabled={isSaving || !eventName.trim() || !eventDate}
+                >
+                  {isSaving ? "Saving..." : "Save event"}
+                </Button>
               </div>
             </div>
           </DialogContent>
@@ -270,10 +331,12 @@ export default function Page() {
       <div className="flex flex-col gap-3">
         {/* Event */}
         <span className="text-muted-foreground">
-          {filteredEvents.length
-            ? format(parseISO(filteredEvents[0].date), "EEEE - MMMM d")
-                .toUpperCase()
-            : "NO EVENTS FOUND"}
+          {activeFilter === "Today"
+            ? `TODAY - ${format(today, "MMMM d").toUpperCase()}`
+            : filteredEvents.length
+              ? format(parseISO(filteredEvents[0].date), "EEEE - MMMM d")
+                  .toUpperCase()
+              : "NO EVENTS FOUND"}
         </span>
         {filteredEvents.map((event) => {
           const eventDate = parseISO(event.date)
