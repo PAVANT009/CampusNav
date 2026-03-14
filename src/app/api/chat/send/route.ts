@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server"
-import { GoogleGenerativeAI } from "@google/generative-ai"
+import {
+  GoogleGenerativeAI,
+  SchemaType,
+  FunctionCallingMode,
+  type FunctionDeclaration,
+} from "@google/generative-ai"
 import db from "@/lib/db"
 import { auth } from "@/lib/auth"
 
@@ -48,24 +53,24 @@ const isConfirmation = (text: string) =>
 const isRejection = (text: string) =>
   /\b(no|cancel|stop|dont|don't|nope)\b/i.test(text)
 
-const functionDeclarations = [
+const functionDeclarations: FunctionDeclaration[] = [
   {
     name: "createEvent",
     description: "Create a new campus event.",
     parameters: {
-      type: "object",
+      type: SchemaType.OBJECT,
       properties: {
-        name: { type: "string" },
+        name: { type: SchemaType.STRING },
         date: {
-          type: "string",
+          type: SchemaType.STRING,
           description: "Event date in YYYY-MM-DD format",
         },
-        startTime: { type: "string" },
-        endTime: { type: "string" },
-        location: { type: "string" },
-        category: { type: "string" },
-        attendees: { type: "number" },
-        status: { type: "string" },
+        startTime: { type: SchemaType.STRING },
+        endTime: { type: SchemaType.STRING },
+        location: { type: SchemaType.STRING },
+        category: { type: SchemaType.STRING },
+        attendees: { type: SchemaType.NUMBER },
+        status: { type: SchemaType.STRING },
       },
       required: ["name", "date"],
     },
@@ -74,11 +79,11 @@ const functionDeclarations = [
     name: "createMapPoint",
     description: "Create a new map point for the campus map.",
     parameters: {
-      type: "object",
+      type: SchemaType.OBJECT,
       properties: {
-        name: { type: "string" },
-        lat: { type: "number" },
-        lng: { type: "number" },
+        name: { type: SchemaType.STRING },
+        lat: { type: SchemaType.NUMBER },
+        lng: { type: SchemaType.NUMBER },
       },
       required: ["name", "lat", "lng"],
     },
@@ -87,9 +92,9 @@ const functionDeclarations = [
     name: "findMapPoint",
     description: "Find map points by name and return coordinates.",
     parameters: {
-      type: "object",
+      type: SchemaType.OBJECT,
       properties: {
-        query: { type: "string" },
+        query: { type: SchemaType.STRING },
       },
       required: ["query"],
     },
@@ -98,9 +103,9 @@ const functionDeclarations = [
     name: "findEvents",
     description: "Find events by name or category.",
     parameters: {
-      type: "object",
+      type: SchemaType.OBJECT,
       properties: {
-        query: { type: "string" },
+        query: { type: SchemaType.STRING },
       },
       required: ["query"],
     },
@@ -337,7 +342,7 @@ ${events.length ? JSON.stringify(events.map((event) => ({
         contents,
         tools: [{ functionDeclarations }],
         toolConfig: {
-          functionCallingConfig: { mode: "auto" },
+          functionCallingConfig: { mode: FunctionCallingMode.AUTO },
         },
       })
 
@@ -355,18 +360,30 @@ ${events.length ? JSON.stringify(events.map((event) => ({
 
       if (functionCalls && functionCalls.length > 0) {
         const call = functionCalls[0]
-        let args: any = call.args
-
-        if (typeof args === "string") {
-          try {
-            args = JSON.parse(args)
-          } catch (error) {
-            sendEvent({
-              type: "tool",
-              status: "error",
-              message: "Invalid tool arguments.",
-            })
+        const parseArgs = (value: unknown): Record<string, unknown> | null => {
+          if (typeof value === "string") {
+            try {
+              const parsed = JSON.parse(value)
+              return parsed && typeof parsed === "object"
+                ? (parsed as Record<string, unknown>)
+                : null
+            } catch {
+              return null
+            }
           }
+          if (value && typeof value === "object") {
+            return value as Record<string, unknown>
+          }
+          return null
+        }
+
+        const args = parseArgs(call.args)
+        if (!args) {
+          sendEvent({
+            type: "tool",
+            status: "error",
+            message: "Invalid tool arguments.",
+          })
         }
 
         if (call.name === "createEvent" && args) {
@@ -391,7 +408,7 @@ ${events.length ? JSON.stringify(events.map((event) => ({
           })}`
         }
 
-        if (call.name === "findMapPoint" && args?.query) {
+        if (call.name === "findMapPoint" && typeof args?.query === "string") {
           toolHandled = true
           const q = String(args.query).toLowerCase()
           const matches = mapPoints.filter((point) =>
@@ -414,7 +431,7 @@ ${events.length ? JSON.stringify(events.map((event) => ({
           })
         }
 
-        if (call.name === "findEvents" && args?.query) {
+        if (call.name === "findEvents" && typeof args?.query === "string") {
           toolHandled = true
           const q = String(args.query).toLowerCase()
           const matches = events.filter((event) => {
