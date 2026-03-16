@@ -12,6 +12,7 @@ import { ChartAreaInteractive } from "../chart-area"
 import DashboardStats from "./dashboard-stats"
 import TodayClassesCard from "./today-classes-card"
 import QuickActionsCard from "./quick-actions-card"
+import Upload from "../file-upload"
 
 // export default function DashboardClient() {
 //   return (
@@ -38,7 +39,8 @@ export default function DashboardClient() {
           <QuickActionsCard/>
         </div>
         <div>
-          <ChartAreaInteractive/>
+          {/* <ChartAreaInteractive/> */}
+          <Upload/>
         </div>
       </div>
     </div>

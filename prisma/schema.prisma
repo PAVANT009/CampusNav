@@ -26,6 +26,7 @@ model User {
   accounts Account[]
   events   Event[]
   mapPoints MapPoint[]
+  timetables Timetable[]
   @@map("users")
 }
 
@@ -126,6 +127,41 @@ model Event {
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("events")
+}
+
+model Timetable {
+  id         String           @id @default(cuid())
+  name       String?
+  sourceFile String?
+  createdAt  DateTime         @default(now())
+  userId     String?
+
+  user    User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  entries TimetableEntry[]
+
+  @@map("timetables")
+}
+
+model TimetableEntry {
+  id          String   @id @default(cuid())
+  timetableId String
+  day         String
+  time        String
+  timeStart   String?
+  timeEnd     String?
+  type        String?
+  group       String?
+  course      String?
+  room        String?
+  section     String?
+  note        String?
+  raw         String
+  createdAt   DateTime @default(now())
+
+  timetable Timetable @relation(fields: [timetableId], references: [id], onDelete: Cascade)
+
+  @@index([timetableId, day])
+  @@map("timetable_entries")
 }
 
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { GooeyToaster , gooeyToast  } from "goey-toast"
+import { GooeyToaster as GooeyToasterBase, gooeyToast } from "goey-toast"
 import type { GooeyToasterProps } from "goey-toast"
 // import "goey-toast/styles.css"
 
@@ -9,7 +9,8 @@ export type { GooeyToasterProps }
 
 
 function GoeyToaster(props: GooeyToasterProps) {
-  return <GooeyToaster position="bottom-right" {...props} />
+  return <GooeyToasterBase position="bottom-right" {...props} />
 }
 
 export { GoeyToaster }
+ 
